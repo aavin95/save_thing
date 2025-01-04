@@ -15,7 +15,12 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #d2b48c, #f5deb3);
+  text-align: center;
+  color: white;
+  font-family: "Inter", sans-serif;
+  margin: 0;
 }
