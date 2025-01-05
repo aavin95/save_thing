@@ -71,7 +71,7 @@ const FileDisplay = ({ userId }: { userId: string }) => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await fetch(`/api/upload?userId=${userId}`);
+        const response = await fetch(`/api/upload/${userId}`);
         const data = await response.json();
 
         if (!response.ok) {
