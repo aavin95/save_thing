@@ -30,7 +30,11 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching files:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      },
       { status: 500 }
     );
   }
@@ -63,7 +67,11 @@ export async function POST(
   } catch (error) {
     console.error("Error uploading data:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      },
       { status: 500 }
     );
   }
