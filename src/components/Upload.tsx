@@ -6,6 +6,10 @@ import styled from "styled-components";
 import Image from "next/image";
 import { FiUploadCloud } from "react-icons/fi";
 import { useSession } from "next-auth/react";
+import { Document, Page, pdfjs } from "react-pdf";
+
+// Configure pdfjs worker
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const DropzoneWrapper = styled.div`
   max-width: 600px;
@@ -65,45 +69,54 @@ const FilePreview = styled.div`
       margin-top: 5px;
     }
   }
+
+  canvas {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
 `;
 
 const FileUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
-  const [pastedText, setPastedText] = useState<string | null>(null);
   const { data: session } = useSession();
 
-  // Handle dropped files
-  const onDrop = async (acceptedFiles: File[]) => {
-    if (!session || !session.user?.id) {
+  const uploadFileToS3 = async (file: File) => {
+    if (!session?.user?.id) {
       console.error("User not authenticated");
       return;
     }
 
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("userId", session.user.id);
 
-    // Upload files to the API
-    for (const file of acceptedFiles) {
-      const response = await fetch("/api/upload", {
+    try {
+      const response = await fetch(`/api/upload/${session.user.id}`, {
         method: "POST",
-        body: JSON.stringify({
-          name: file.name,
-          type: file.type,
-          content: await file.text(), // Convert the file to text or Base64
-          userId: session.user.id, // Add the user ID
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        body: formData,
       });
 
-      const result = await response.json();
-      if (!result.success) {
-        console.error("Failed to upload file:", result.error);
+      const data = await response.json();
+
+      if (!data.success) {
+        console.error("Upload failed:", data.error);
+      } else {
+        console.log("File uploaded:", data.id);
       }
+    } catch (error) {
+      console.error("Error uploading file:", error);
     }
   };
 
-  // Configure useDropzone
+  const onDrop = async (acceptedFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+
+    // Upload each file to the server
+    acceptedFiles.forEach((file) => uploadFileToS3(file));
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -114,42 +127,8 @@ const FileUpload = () => {
     multiple: true,
   });
 
-  // Handle pasted text
-  const handlePaste = async (event: React.ClipboardEvent<HTMLDivElement>) => {
-    if (!session || !session.user?.id) {
-      console.error("User not authenticated");
-      return;
-    }
-
-    const clipboardText = event.clipboardData.getData("Text");
-    if (clipboardText) {
-      setPastedText(clipboardText);
-
-      // Upload text to the API
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: JSON.stringify({
-          text: clipboardText,
-          userId: session.user.id, // Add the user ID
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        console.error("Failed to upload text:", result.error);
-      }
-    }
-  };
-
   return (
-    <DropzoneWrapper
-      {...getRootProps()}
-      onPaste={handlePaste}
-      tabIndex={0} // Make the dropzone focusable
-    >
+    <DropzoneWrapper {...getRootProps()} tabIndex={0}>
       <input {...getInputProps()} />
       <div className="icon">
         <FiUploadCloud />
@@ -157,57 +136,47 @@ const FileUpload = () => {
       {isDragActive ? (
         <p>Drop the files here...</p>
       ) : (
-        <p>
-          Drag & drop files here, paste text, or click to select files (PDF,
-          MP4, MP3)
-        </p>
+        <p>Drag & drop files here, or click to select files (PDF, MP4, MP3)</p>
       )}
 
-      {/* File Previews */}
       <FilePreview>
         {files.map((file, index) => (
           <div key={index}>
-            {file.type.startsWith("image/") ? (
-              <Image
-                src={URL.createObjectURL(file)} // Generate the object URL
+            {file.type === "application/pdf" ? (
+              <Document file={file}>
+                <Page pageNumber={1} width={100} />
+              </Document>
+            ) : file.type.startsWith("image/") ? (
+              <img
+                src={URL.createObjectURL(file)}
                 alt={file.name}
-                onLoad={(e) =>
-                  URL.revokeObjectURL((e.target as HTMLImageElement).src)
-                } // Revoke the object URL after the image loads
-                width={100}
-                height={100}
+                onLoad={() => URL.revokeObjectURL(file)}
               />
             ) : (
               <>
-                <Image
-                  src="/file-icon.png" // Add a placeholder icon for non-image files
-                  alt={file.name}
-                  width={100}
-                  height={100}
-                />
+                <div
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#e5e7eb",
+                    borderRadius: "8px",
+                    fontSize: "0.75rem",
+                    color: "#6b7280",
+                  }}
+                >
+                  <span role="img" aria-label="file">
+                    📄
+                  </span>
+                </div>
                 <p>{file.name}</p>
               </>
             )}
           </div>
         ))}
       </FilePreview>
-
-      {/* Pasted Text Display */}
-      {pastedText && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            backgroundColor: "#f9f9f9",
-            textAlign: "left",
-          }}
-        >
-          <strong>Pasted Text:</strong>
-          <p>{pastedText}</p>
-        </div>
-      )}
     </DropzoneWrapper>
   );
 };

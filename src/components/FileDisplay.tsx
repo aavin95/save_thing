@@ -12,7 +12,7 @@ const FileWrapper = styled.div`
   gap: 20px;
 `;
 
-const FileCard = styled.div`
+const FileCard = styled.a`
   display: flex;
   align-items: center;
   padding: 20px;
@@ -20,6 +20,14 @@ const FileCard = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.3s, transform 0.3s;
+
+  &:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
 
   img,
   video {
@@ -106,16 +114,42 @@ const FileDisplay = ({ userId }: { userId: string }) => {
   return (
     <FileWrapper>
       {files.map((file) => (
-        <FileCard key={file._id}>
+        <FileCard
+          key={file._id}
+          href={file.storageUrl || file.content} // Use the file's S3 URL or content URL
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {file.type.startsWith("image/") ? (
             <Image
-              src={file.content} // Assuming the content field contains a URL or Base64 image
+              src={file.storageUrl || file.content} // URL or Base64 for image
               alt={file.name}
               width={80}
               height={80}
             />
           ) : file.type.startsWith("video/") ? (
-            <video src={file.content} controls width="80" height="80" />
+            <video
+              src={file.storageUrl || file.content} // URL for video
+              controls
+              width="80"
+              height="80"
+            />
+          ) : file.type === "application/pdf" ? (
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#e5e7eb",
+                borderRadius: "8px",
+                fontSize: "1.5rem",
+                color: "#6b7280",
+              }}
+            >
+              📄
+            </div>
           ) : (
             <div
               style={{
@@ -126,11 +160,11 @@ const FileDisplay = ({ userId }: { userId: string }) => {
                 justifyContent: "center",
                 background: "#e5e7eb",
                 borderRadius: "8px",
-                fontSize: "0.75rem",
+                fontSize: "1.5rem",
                 color: "#6b7280",
               }}
             >
-              {file.type}
+              ❓
             </div>
           )}
           <p>{file.name}</p>
