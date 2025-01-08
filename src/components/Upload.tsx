@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
-import Image from "next/image";
 import { FiUploadCloud } from "react-icons/fi";
 import { useSession } from "next-auth/react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -123,6 +122,19 @@ const FileUpload = () => {
       "application/pdf": [".pdf"],
       "video/mp4": [".mp4"],
       "audio/mpeg": [".mp3"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/gif": [".gif"],
+      "image/webp": [".webp"],
+      "image/tiff": [".tiff", ".tif"],
+      "audio/wav": [".wav"],
+      "audio/ogg": [".ogg"],
+      "audio/mp4": [".m4a"],
+      "video/x-msvideo": [".avi"],
+      "video/x-matroska": [".mkv"],
+      "video/quicktime": [".mov"],
+      "application/zip": [".zip"],
+      "application/x-rar-compressed": [".rar"],
     },
     multiple: true,
   });
