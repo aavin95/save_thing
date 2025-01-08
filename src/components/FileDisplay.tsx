@@ -3,22 +3,27 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const FileWrapper = styled.div`
-  max-width: 800px;
+  max-width: 1200px;
   margin: 50px auto;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 `;
 
 const FileCard = styled.a`
   display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   padding: 20px;
-  background: #f9f9f9;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   color: inherit;
@@ -30,19 +35,24 @@ const FileCard = styled.a`
   }
 
   img,
-  video {
-    width: 80px;
-    height: 80px;
+  video,
+  div {
+    width: 100px;
+    height: 100px;
     object-fit: cover;
-    margin-right: 20px;
-    border-radius: 8px;
+    margin-bottom: 10px;
+    border-radius: 12px;
     border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #374151;
     margin: 0;
+    word-wrap: break-word;
   }
 `;
 
@@ -135,21 +145,11 @@ const FileDisplay = ({ userId }: { userId: string }) => {
               height="80"
             />
           ) : file.type === "application/pdf" ? (
-            <div
-              style={{
-                width: "80px",
-                height: "80px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#e5e7eb",
-                borderRadius: "8px",
-                fontSize: "1.5rem",
-                color: "#6b7280",
-              }}
-            >
-              📄
-            </div>
+            <iframe
+              src={file.storageUrl || file.content}
+              width="80"
+              height="80"
+            />
           ) : (
             <div
               style={{
