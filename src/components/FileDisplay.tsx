@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 const FileWrapper = styled.div`
   max-width: 1200px;
@@ -72,44 +73,11 @@ const LoadingSpinner = styled.div`
   }
 `;
 
-const ErrorMessage = styled.div`
-  color: #f87171;
-  text-align: center;
-  font-size: 1.2rem;
-`;
+const FileDisplay = ({ files }: { files: File[] }) => {
+  const { status } = useSession();
 
-const FileDisplay = ({ userId }: { userId: string }) => {
-  const [files, setFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await fetch(`/api/upload/${userId}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch files");
-        }
-
-        setFiles(data.files);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFiles();
-  }, [userId]);
-
-  if (loading) {
+  if (status === "loading") {
     return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
   }
 
   if (files.length === 0) {
@@ -120,9 +88,9 @@ const FileDisplay = ({ userId }: { userId: string }) => {
 
   return (
     <FileWrapper>
-      {files.map((file) => (
+      {files.map((file, index) => (
         <FileCard
-          key={file._id}
+          key={file._id || `${file.name}-${index}`} // Ensure a fallback key if _id is missing
           href={file.storageUrl || file.content} // Use the file's S3 URL or content URL
           target="_blank"
           rel="noopener noreferrer"

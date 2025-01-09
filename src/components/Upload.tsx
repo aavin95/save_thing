@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { FiUploadCloud } from "react-icons/fi";
 import { useSession } from "next-auth/react";
 import { Document, Page } from "react-pdf";
 import Image from "next/image";
-
+import LoadingSpinner from "./LoadingSpinner";
 // Configure pdfjs worker
 
 const DropzoneWrapper = styled.div`
@@ -77,12 +77,17 @@ const FilePreview = styled.div`
   }
 `;
 
-const FileUpload = () => {
-  const [files, setFiles] = useState<File[]>([]);
+const Upload = ({
+  files,
+  setFiles,
+}: {
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+}) => {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   const uploadFile = async (file: File) => {
@@ -108,20 +113,14 @@ const FileUpload = () => {
       } else {
         console.log("File uploaded:", data.id);
 
-        // Fetch the updated list of files
-        const response = await fetch(`/api/upload/${session.user.id}`, {
-          method: "GET",
-        });
-        const updatedFilesData = await response.json();
+        const newFile = {
+          _id: data.id, // Replace with the actual file ID from your API response
+          name: file.name,
+          type: file.type,
+          storageUrl: data.storageUrl, // Replace with the actual file URL from your API response
+        };
 
-        if (updatedFilesData.success) {
-          setFiles(updatedFilesData.files);
-        } else {
-          console.error(
-            "Failed to fetch updated files:",
-            updatedFilesData.error
-          );
-        }
+        setFiles((prevFiles) => [...prevFiles, newFile]);
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -129,38 +128,20 @@ const FileUpload = () => {
   };
 
   const onDrop = async (acceptedFiles: File[]) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-
     // Upload each file to the server
     await Promise.all(
       acceptedFiles.map(async (file) => {
         await uploadFile(file);
       })
     );
-
-    // Clear files after upload
-    setFiles([]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       "application/pdf": [".pdf"],
-      "video/mp4": [".mp4"],
-      "audio/mpeg": [".mp3"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/gif": [".gif"],
-      "image/webp": [".webp"],
-      "image/tiff": [".tiff", ".tif"],
-      "audio/wav": [".wav"],
-      "audio/ogg": [".ogg"],
-      "audio/mp4": [".m4a"],
-      "video/x-msvideo": [".avi"],
-      "video/x-matroska": [".mkv"],
-      "video/quicktime": [".mov"],
-      "application/zip": [".zip"],
-      "application/x-rar-compressed": [".rar"],
+      "image/*": [],
+      "video/*": [],
     },
     multiple: true,
   });
@@ -176,68 +157,8 @@ const FileUpload = () => {
       ) : (
         <p>Drag & drop files here, or click to select files (PDF, MP4, MP3)</p>
       )}
-
-      <FilePreview>
-        {files.map((file, index) => (
-          <div key={index}>
-            {file.type === "application/pdf" ? (
-              <Document file={file}>
-                <Page pageNumber={1} width={100} />
-              </Document>
-            ) : file.type.startsWith("image/") ? (
-              <div
-                style={{
-                  position: "relative",
-                  width: "100px",
-                  height: "100px",
-                }}
-              >
-                {file instanceof File ? (
-                  <Image
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    fill
-                    style={{
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      border: "1px solid #ddd",
-                    }}
-                    onLoad={(e) =>
-                      URL.revokeObjectURL((e.target as HTMLImageElement).src)
-                    } // Revoke the URL after it's loaded
-                    unoptimized
-                  />
-                ) : (
-                  <p>Invalid file type</p>
-                )}
-              </div>
-            ) : (
-              <>
-                <div
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#e5e7eb",
-                    borderRadius: "8px",
-                    fontSize: "0.75rem",
-                    color: "#6b7280",
-                  }}
-                >
-                  <span role="img" aria-label="file">
-                    📄
-                  </span>
-                </div>
-                <p>{file.name}</p>
-              </>
-            )}
-          </div>
-        ))}
-      </FilePreview>
     </DropzoneWrapper>
   );
 };
 
-export default FileUpload;
+export default Upload;

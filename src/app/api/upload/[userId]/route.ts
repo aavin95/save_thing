@@ -57,7 +57,11 @@ export async function POST(
       uploadedAt: new Date(),
     });
 
-    return NextResponse.json({ success: true, id: result.insertedId });
+    return NextResponse.json({
+      success: true,
+      id: result.insertedId,
+      storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${userId}/${file.name}`,
+    });
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(

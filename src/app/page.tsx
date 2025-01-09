@@ -3,13 +3,13 @@
 import WelcomePage from "@/components/WelcomePage";
 import Save from "@/components/Save";
 import { useSession } from "next-auth/react";
-
+import LoadingSpinner from "@/components/LoadingSpinner";
 const Page = () => {
   const { data: session, status } = useSession();
 
   // Show a loading state while the session is being determined
   if (status === "loading") {
-    return <div>Loading...</div>; // Render a loading indicator
+    return <LoadingSpinner />; // Render a loading indicator
   }
 
   // Render based on session status
