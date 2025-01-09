@@ -2,10 +2,15 @@ import React from "react";
 import Upload from "@/components/Upload";
 import FileDisplay from "@/components/FileDisplay";
 import { useSession } from "next-auth/react";
+
 const Save: React.FC = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userId = session?.user?.id;
-  console.log(userId);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <Upload />

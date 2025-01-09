@@ -9,7 +9,7 @@ const Page = () => {
 
   // Show a loading state while the session is being determined
   if (status === "loading") {
-    return null;
+    return <div>Loading...</div>; // Render a loading indicator
   }
 
   // Render based on session status
