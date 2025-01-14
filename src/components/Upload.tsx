@@ -83,7 +83,7 @@ const Upload = ({
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", file as unknown as Blob);
     formData.append("userId", userId);
 
     try {
