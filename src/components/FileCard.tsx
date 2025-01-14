@@ -58,14 +58,14 @@ const EditableInput = styled.input`
 interface File {
   _id?: string; // Optional, as some files might not have an ID
   name: string; // File name
-  title: string;
+  title?: string;
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
 }
 
 const FileCard = ({ file }: { file: File }) => {
-  const [title, setTitle] = useState<string>(file.title); // Local state for title
+  const [title, setTitle] = useState<string>(file?.title || ""); // Local state for title
   const [isEditing, setIsEditing] = useState(false); // State to track editing
   const { data: session } = useSession();
 
@@ -85,11 +85,11 @@ const FileCard = ({ file }: { file: File }) => {
 
         if (!response.ok) {
           console.error("Failed to update title");
-          setTitle(file.title); // Revert on failure
+          setTitle(file.name); // Revert on failure
         }
       } catch (error) {
         console.error("Error updating title:", error);
-        setTitle(file.title); // Revert on error
+        setTitle(file.name); // Revert on error
       }
     }
 
