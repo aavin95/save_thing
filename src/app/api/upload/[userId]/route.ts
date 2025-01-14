@@ -51,6 +51,7 @@ export async function POST(
     const result = await collection.insertOne({
       userId,
       name: file.name,
+      title: file.name,
       type: file.type,
       size: file.size,
       storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${userId}/${file.name}`, // Construct S3 URL manually

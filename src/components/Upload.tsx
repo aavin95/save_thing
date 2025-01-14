@@ -5,10 +5,7 @@ import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { FiUploadCloud } from "react-icons/fi";
 import { useSession } from "next-auth/react";
-import { Document, Page } from "react-pdf";
-import Image from "next/image";
 import LoadingSpinner from "./LoadingSpinner";
-// Configure pdfjs worker
 
 const DropzoneWrapper = styled.div`
   max-width: 600px;
@@ -40,51 +37,40 @@ const DropzoneWrapper = styled.div`
   }
 `;
 
-const FilePreview = styled.div`
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-
-  div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 100px;
-    word-wrap: break-word;
-
-    img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    p {
-      font-size: 0.85rem;
-      color: #6b7280;
-      text-align: center;
-      margin-top: 5px;
-    }
-  }
-
-  canvas {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-  }
-`;
+interface File {
+  _id?: string; // Optional, as some files might not have an ID
+  name: string; // File name
+  type: string; // MIME type of the file (e.g., "image/png")
+  storageUrl?: string; // URL where the file is stored (e.g., on S3)
+  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+}
 
 const Upload = ({
-  files,
+  userId,
   setFiles,
 }: {
+  userId: string;
   files: File[];
   setFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }) => {
   const { data: session, status } = useSession();
+
+  // Ensure useDropzone is called unconditionally
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: async (acceptedFiles: File[]) => {
+      await Promise.all(
+        acceptedFiles.map(async (file) => {
+          await uploadFile(file);
+        })
+      );
+    },
+    accept: {
+      "application/pdf": [".pdf"],
+      "image/*": [],
+      "video/*": [],
+    },
+    multiple: true,
+  });
 
   if (status === "loading") {
     return <LoadingSpinner />;
@@ -98,10 +84,10 @@ const Upload = ({
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("userId", session.user.id);
+    formData.append("userId", userId);
 
     try {
-      const response = await fetch(`/api/upload/${session.user.id}`, {
+      const response = await fetch(`/api/upload/${userId}`, {
         method: "POST",
         body: formData,
       });
@@ -114,10 +100,10 @@ const Upload = ({
         console.log("File uploaded:", data.id);
 
         const newFile = {
-          _id: data.id, // Replace with the actual file ID from your API response
+          _id: data.id,
           name: file.name,
           type: file.type,
-          storageUrl: data.storageUrl, // Replace with the actual file URL from your API response
+          storageUrl: data.storageUrl,
         };
 
         setFiles((prevFiles) => [...prevFiles, newFile]);
@@ -126,25 +112,6 @@ const Upload = ({
       console.error("Error uploading file:", error);
     }
   };
-
-  const onDrop = async (acceptedFiles: File[]) => {
-    // Upload each file to the server
-    await Promise.all(
-      acceptedFiles.map(async (file) => {
-        await uploadFile(file);
-      })
-    );
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-      "image/*": [],
-      "video/*": [],
-    },
-    multiple: true,
-  });
 
   return (
     <DropzoneWrapper {...getRootProps()} tabIndex={0}>
