@@ -12,6 +12,7 @@ interface File {
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+  text?: string;
 }
 
 const Save: React.FC = () => {
@@ -52,8 +53,16 @@ const Save: React.FC = () => {
       {session?.user?.id && (
         <>
           <Upload userId={session.user.id} files={files} setFiles={setFiles} />
-          <TextField userId={session.user.id} />
-          <FileDisplay files={files} />
+          <TextField
+            userId={session.user.id}
+            files={files}
+            setFiles={setFiles}
+          />
+          <FileDisplay
+            files={files}
+            setFiles={setFiles}
+            userId={session.user.id}
+          />
         </>
       )}
     </div>

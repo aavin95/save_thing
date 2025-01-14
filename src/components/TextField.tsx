@@ -3,6 +3,15 @@ import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "./LoadingSpinner";
 
+interface File {
+  _id?: string; // Optional, as some files might not have an ID
+  name: string; // File name
+  type: string; // MIME type of the file (e.g., "image/png")
+  storageUrl?: string; // URL where the file is stored (e.g., on S3)
+  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+  text?: string;
+}
+
 const TextUploadWrapper = styled.div`
   max-width: 600px;
   margin: 50px auto;
@@ -48,7 +57,15 @@ const TextUploadWrapper = styled.div`
   }
 `;
 
-const TextUpload = ({ userId }: { userId: string }) => {
+const TextUpload = ({
+  userId,
+  files,
+  setFiles,
+}: {
+  userId: string;
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+}) => {
   const { data: session, status } = useSession();
   const [text, setText] = useState("");
 
@@ -78,6 +95,15 @@ const TextUpload = ({ userId }: { userId: string }) => {
       } else {
         console.log("Text uploaded:", data.id);
         setText(""); // Clear the text area after successful upload
+        const newFile = {
+          _id: data.id,
+          name: text.slice(0, 10),
+          title: text.slice(0, 10),
+          type: "text/plain",
+          storageUrl: data.storageUrl,
+        };
+
+        setFiles((prevFiles: File[]) => [...prevFiles, newFile]);
       }
     } catch (error) {
       console.error("Error uploading text:", error);

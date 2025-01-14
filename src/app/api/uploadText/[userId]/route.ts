@@ -19,10 +19,10 @@ export async function POST(
   try {
     const client = await clientPromise;
     const db = client.db("save_thing");
-    const collection = db.collection("text_uploads");
+    const collection = db.collection("uploads");
 
     const { userId } = await params;
-    const { text } = await req.json();
+    const { text, id } = await req.json();
 
     if (!text || !userId) {
       return NextResponse.json(
@@ -31,33 +31,78 @@ export async function POST(
       );
     }
 
-    // Upload text to S3
-    const uploadParams = {
-      Bucket: process.env.AWS_S3_BUCKET_NAME!,
-      Key: `${userId}/text-${Date.now()}.txt`, // Unique file path in S3
-      Body: text,
-      ContentType: "text/plain",
-    };
+    let storageUrl;
+    let result;
+    if (id) {
+      // Update existing text
+      const existingDocument = await collection.findOne({ _id: id, userId });
+      if (!existingDocument) {
+        return NextResponse.json(
+          { success: false, error: "Document not found" },
+          { status: 404 }
+        );
+      }
 
-    const command = new PutObjectCommand(uploadParams);
-    await s3Client.send(command);
+      // Update text in S3
+      const uploadParams = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME!,
+        Key: existingDocument.storageUrl.split(".com/")[1],
+        Body: text,
+        ContentType: "text/plain",
+      };
 
-    // Save text metadata in MongoDB
-    const result = await collection.insertOne({
-      userId,
-      text,
-      storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+
+      // Update text metadata in MongoDB
+      await collection.updateOne(
+        { _id: id },
+        {
+          $set: {
+            text,
+            title: text.slice(0, 10),
+            name: text.slice(0, 10),
+            uploadedAt: new Date(),
+          },
+        }
+      );
+
+      storageUrl = existingDocument.storageUrl;
+    } else {
+      // Upload new text to S3
+      const uploadParams = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME!,
+        Key: `${userId}/text-${Date.now()}.txt`,
+        Body: text,
+        ContentType: "text/plain",
+      };
+
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+
+      // Save new text metadata in MongoDB
+      result = await collection.insertOne({
+        userId,
+        title: text.slice(0, 10),
+        name: text.slice(0, 10),
+        type: "text/plain",
+        text,
+        storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
+          process.env.AWS_REGION
+        }.amazonaws.com/${userId}/text-${Date.now()}.txt`,
+        uploadedAt: new Date(),
+      });
+
+      storageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
         process.env.AWS_REGION
-      }.amazonaws.com/${userId}/text-${Date.now()}.txt`, // Construct S3 URL manually
-      uploadedAt: new Date(),
-    });
+      }.amazonaws.com/${userId}/text-${Date.now()}.txt`;
+    }
 
     return NextResponse.json({
       success: true,
-      id: result.insertedId,
-      storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
-        process.env.AWS_REGION
-      }.amazonaws.com/${userId}/text-${Date.now()}.txt`,
+      id: id || result?.insertedId,
+      storageUrl,
+      text,
     });
   } catch (error) {
     console.error("Error uploading text:", error);

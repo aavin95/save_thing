@@ -62,6 +62,8 @@ interface File {
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+  text?: string;
+
 }
 
 const FileCard = ({ file }: { file: File }) => {
@@ -118,6 +120,10 @@ const FileCard = ({ file }: { file: File }) => {
           width="80"
           height="80"
         />
+      ) : file.type === "text/plain" ? (
+        <div>
+          <p>{file.content || file.name || "No content available"}</p>
+        </div>
       ) : (
         <div
           style={{

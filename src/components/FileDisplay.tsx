@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import FileCard from "./FileCard";
+import TextCard from "./TextCard";
 
 const FileWrapper = styled.div`
   max-width: 1200px;
@@ -45,7 +46,9 @@ const FileSelectionWrapper = styled.div`
   margin-right: 299px;
 `;
 
-const FileSelectionButton = styled.button<{ isactive: boolean }>`
+const FileSelectionButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== "isactive", // Prevent `isactive` from being forwarded to the DOM
+})<{ isactive: boolean }>`
   background: ${({ isactive }) => (isactive ? "#F87171" : "#2563eb")};
   color: white;
   padding: 10px 20px;
@@ -66,9 +69,18 @@ interface File {
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+  text?: string;
 }
 
-const FileDisplay = ({ files }: { files: File[] }) => {
+const FileDisplay = ({
+  files,
+  setFiles,
+  userId,
+}: {
+  files: File[];
+  setFiles: (files: File[]) => void;
+  userId: string;
+}) => {
   const { status } = useSession();
   const [selectedFileType, setSelectedFileType] = useState<string>("");
 
@@ -115,11 +127,34 @@ const FileDisplay = ({ files }: { files: File[] }) => {
         >
           Documents
         </FileSelectionButton>
+        <FileSelectionButton
+          isactive={selectedFileType === "text/plain"}
+          onClick={() =>
+            setSelectedFileType(
+              selectedFileType === "text/plain" ? "" : "text/plain"
+            )
+          }
+        >
+          Text
+        </FileSelectionButton>
       </FileSelectionWrapper>
       <FileWrapper>
-        {filteredFiles.map((file, index) => (
-          <FileCard key={file._id || `${file.name}-${index}`} file={file} />
-        ))}
+        {filteredFiles.map((file, index) => {
+          if (file.type === "text/plain") {
+            return (
+              <TextCard
+                key={file._id || `${file.name}-${index}`}
+                text={file.content || file.name || "No content available"}
+                files={files}
+                setFiles={setFiles}
+                userId={userId}
+              />
+            );
+          }
+          return (
+            <FileCard key={file._id || `${file.name}-${index}`} file={file} />
+          );
+        })}
       </FileWrapper>
     </>
   );

@@ -43,6 +43,7 @@ interface File {
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
+  text?: string;
 }
 
 const Upload = ({
