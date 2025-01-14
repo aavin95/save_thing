@@ -3,10 +3,12 @@ import Upload from "@/components/Upload";
 import FileDisplay from "@/components/FileDisplay";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "./LoadingSpinner";
+import TextField from "./TextField";
 
 interface File {
   _id?: string; // Optional, as some files might not have an ID
   name: string; // File name
+  title?: string;
   type: string; // MIME type of the file (e.g., "image/png")
   storageUrl?: string; // URL where the file is stored (e.g., on S3)
   content?: string; // Fallback for file content (e.g., base64 or other inline representation)
@@ -48,9 +50,12 @@ const Save: React.FC = () => {
   return (
     <div>
       {session?.user?.id && (
-        <Upload userId={session.user.id} files={files} setFiles={setFiles} />
+        <>
+          <Upload userId={session.user.id} files={files} setFiles={setFiles} />
+          <TextField userId={session.user.id} />
+          <FileDisplay files={files} />
+        </>
       )}
-      <FileDisplay files={files} />
     </div>
   );
 };

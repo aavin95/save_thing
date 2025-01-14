@@ -102,6 +102,7 @@ const Upload = ({
         const newFile = {
           _id: data.id,
           name: file.name,
+          title: file.name,
           type: file.type,
           storageUrl: data.storageUrl,
         };
