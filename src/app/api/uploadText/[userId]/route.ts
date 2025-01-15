@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 // Configure AWS S3 Client
 const s3Client = new S3Client({
@@ -35,7 +36,12 @@ export async function POST(
     let result;
     if (id) {
       // Update existing text
-      const existingDocument = await collection.findOne({ _id: id, userId });
+      const objectId = new ObjectId(id); // Convert id to ObjectId
+      const existingDocument = await collection.findOne({
+        _id: objectId,
+        userId,
+      });
+
       if (!existingDocument) {
         return NextResponse.json(
           { success: false, error: "Document not found" },
@@ -56,7 +62,7 @@ export async function POST(
 
       // Update text metadata in MongoDB
       await collection.updateOne(
-        { _id: id },
+        { _id: objectId },
         {
           $set: {
             text,
@@ -70,9 +76,10 @@ export async function POST(
       storageUrl = existingDocument.storageUrl;
     } else {
       // Upload new text to S3
+      const newKey = `${userId}/text-${Date.now()}.txt`;
       const uploadParams = {
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
-        Key: `${userId}/text-${Date.now()}.txt`,
+        Key: newKey,
         Body: text,
         ContentType: "text/plain",
       };
@@ -87,15 +94,11 @@ export async function POST(
         name: text.slice(0, 10),
         type: "text/plain",
         text,
-        storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
-          process.env.AWS_REGION
-        }.amazonaws.com/${userId}/text-${Date.now()}.txt`,
+        storageUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${newKey}`,
         uploadedAt: new Date(),
       });
 
-      storageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${
-        process.env.AWS_REGION
-      }.amazonaws.com/${userId}/text-${Date.now()}.txt`;
+      storageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${newKey}`;
     }
 
     return NextResponse.json({

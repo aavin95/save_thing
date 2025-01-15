@@ -89,6 +89,7 @@ interface TextCardProps {
   files?: File[];
   setFiles?: (files: File[]) => void;
   userId: string;
+  cardKey: string;
 }
 
 const TextCard: React.FC<TextCardProps> = ({
@@ -96,6 +97,7 @@ const TextCard: React.FC<TextCardProps> = ({
   files,
   setFiles,
   userId,
+  cardKey,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,9 +117,10 @@ const TextCard: React.FC<TextCardProps> = ({
   };
 
   const handleSave = async () => {
+    console.log("cardKey in handleSave", cardKey);
     const request = await fetch(`/api/uploadText/${userId}`, {
       method: "POST",
-      body: JSON.stringify({ text: editedText }),
+      body: JSON.stringify({ text: editedText, id: cardKey }),
     });
     if (request.ok) {
       const data = await request.json();

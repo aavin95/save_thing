@@ -148,6 +148,7 @@ const FileDisplay = ({
                 files={files}
                 setFiles={setFiles}
                 userId={userId}
+                cardKey={file._id || `${file.name}-${index}`}
               />
             );
           }
