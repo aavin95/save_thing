@@ -50,9 +50,9 @@ const Upload = ({
 
   // Ensure useDropzone is called unconditionally
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: async (acceptedFiles: File[]) => {
+    onDrop: async (acceptedFiles) => {
       await Promise.all(
-        acceptedFiles.map(async (file) => {
+        acceptedFiles.map(async (file: globalThis.File) => {
           await uploadFile(file);
         })
       );
@@ -69,7 +69,7 @@ const Upload = ({
     return <LoadingSpinner />;
   }
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: globalThis.File) => {
     if (!session?.user?.id) {
       console.error("User not authenticated");
       return;

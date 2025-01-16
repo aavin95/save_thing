@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { File } from "../types/types";
 
-const FileCardWrapper = styled.div`
+const FileCardWrapper = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,8 +88,15 @@ const FileCard = ({ file }: { file: File }) => {
     setIsEditing(false); // Exit editing mode
   };
 
+  const openFile = () => {
+    window.open(
+      file.storageUrl || file.content || "/public/default_image.png",
+      "_blank"
+    );
+  };
+
   return (
-    <FileCardWrapper>
+    <FileCardWrapper onClick={openFile}>
       {file.type.startsWith("image/") ? (
         <Image
           src={file.storageUrl || file.content || "/public/default_image.png"} // Provide a default image path
