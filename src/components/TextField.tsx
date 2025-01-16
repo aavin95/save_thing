@@ -49,6 +49,22 @@ const TextUploadWrapper = styled.div`
   }
 `;
 
+const StyledButton = styled.button`
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: #1e40af;
+  }
+`;
+
 const TextUpload = ({
   userId,
   setFiles,
@@ -108,7 +124,7 @@ const TextUpload = ({
         onChange={(e) => setText(e.target.value)}
         placeholder="Type or paste your text here..."
       />
-      <button onClick={handleTextUpload}>Upload Text</button>
+      <StyledButton onClick={handleTextUpload}>Upload Text</StyledButton>
     </TextUploadWrapper>
   );
 };

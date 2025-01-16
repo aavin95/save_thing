@@ -139,14 +139,16 @@ const FileDisplay = ({
                 text={file.text || file.name || "No content available"}
                 title={file.title || file.name || "No content available"}
                 setFiles={setFiles}
+                files={files}
                 userId={userId}
                 cardKey={file._id || `${file.name}-${index}`}
               />
             );
+          } else {
+            return (
+              <FileCard key={file._id || `${file.name}-${index}`} file={file} />
+            );
           }
-          return (
-            <FileCard key={file._id || `${file.name}-${index}`} file={file} />
-          );
         })}
       </FileWrapper>
     </>

@@ -64,15 +64,18 @@ const TextArea = styled.textarea`
   margin-bottom: 16px;
 `;
 
-const Button = styled.button`
-  padding: 8px 16px;
+const StyledButton = styled.button`
   background-color: #2563eb;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 
   &:hover {
+    transform: scale(1.05);
     background-color: #1e40af;
   }
 `;
@@ -112,6 +115,7 @@ const TextCard: React.FC<TextCardProps> = ({
 
   const handleSave = async () => {
     if (editedText === text) {
+      toast.error("No changes made!");
       closeModal();
       return;
     }
@@ -134,7 +138,6 @@ const TextCard: React.FC<TextCardProps> = ({
             : file
         );
         setFiles(updatedFiles);
-        console.log("files", files);
       }
     } else {
       toast.error("Failed to save changes!");
@@ -187,8 +190,8 @@ const TextCard: React.FC<TextCardProps> = ({
         <div
           style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
         >
-          <Button onClick={closeModal}>Cancel</Button>
-          <Button onClick={handleSave}>Save</Button>
+          <StyledButton onClick={closeModal}>Cancel</StyledButton>
+          <StyledButton onClick={handleSave}>Save</StyledButton>
         </div>
       </Modal>
     </>
