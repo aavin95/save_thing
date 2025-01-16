@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { FiUploadCloud } from "react-icons/fi";
 import { useSession } from "next-auth/react";
 import LoadingSpinner from "./LoadingSpinner";
+import { File } from "../types/types";
 
 const DropzoneWrapper = styled.div`
   max-width: 600px;
@@ -36,15 +37,6 @@ const DropzoneWrapper = styled.div`
     margin-bottom: 10px;
   }
 `;
-
-interface File {
-  _id?: string; // Optional, as some files might not have an ID
-  name: string; // File name
-  type: string; // MIME type of the file (e.g., "image/png")
-  storageUrl?: string; // URL where the file is stored (e.g., on S3)
-  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
-  text?: string;
-}
 
 const Upload = ({
   userId,

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { File } from "../types/types";
 
 const FileCardWrapper = styled.div`
   display: flex;
@@ -54,17 +55,6 @@ const EditableInput = styled.input`
     border-bottom: 1px solid #2563eb;
   }
 `;
-
-interface File {
-  _id?: string; // Optional, as some files might not have an ID
-  name: string; // File name
-  title?: string;
-  type: string; // MIME type of the file (e.g., "image/png")
-  storageUrl?: string; // URL where the file is stored (e.g., on S3)
-  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
-  text?: string;
-
-}
 
 const FileCard = ({ file }: { file: File }) => {
   const [title, setTitle] = useState<string>(file?.title || ""); // Local state for title
@@ -122,7 +112,7 @@ const FileCard = ({ file }: { file: File }) => {
         />
       ) : file.type === "text/plain" ? (
         <div>
-          <p>{file.content || file.name || "No content available"}</p>
+          <p>{file.text || "No content available"}</p>
         </div>
       ) : (
         <div

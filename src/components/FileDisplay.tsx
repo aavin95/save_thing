@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import FileCard from "./FileCard";
 import TextCard from "./TextCard";
+import { File } from "../types/types";
 
 const FileWrapper = styled.div`
   max-width: 1200px;
@@ -62,15 +63,6 @@ const FileSelectionButton = styled.button.withConfig({
     background-color: #f87171;
   }
 `;
-
-interface File {
-  _id?: string; // Optional, as some files might not have an ID
-  name: string; // File name
-  type: string; // MIME type of the file (e.g., "image/png")
-  storageUrl?: string; // URL where the file is stored (e.g., on S3)
-  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
-  text?: string;
-}
 
 const FileDisplay = ({
   files,
@@ -144,8 +136,8 @@ const FileDisplay = ({
             return (
               <TextCard
                 key={file._id || `${file.name}-${index}`}
-                text={file.content || file.name || "No content available"}
-                files={files}
+                text={file.text || file.name || "No content available"}
+                title={file.title || file.name || "No content available"}
                 setFiles={setFiles}
                 userId={userId}
                 cardKey={file._id || `${file.name}-${index}`}

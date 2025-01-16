@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Modal from "react-modal";
+import { File } from "../types/types";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CardWrapper = styled.div`
   display: flex;
@@ -74,15 +77,6 @@ const Button = styled.button`
   }
 `;
 
-interface File {
-  _id?: string; // Optional, as some files might not have an ID
-  name: string; // File name
-  title?: string;
-  type: string; // MIME type of the file (e.g., "image/png")
-  storageUrl?: string; // URL where the file is stored (e.g., on S3)
-  content?: string; // Fallback for file content (e.g., base64 or other inline representation)
-  text?: string;
-}
 interface TextCardProps {
   title: string;
   text: string;
@@ -117,22 +111,35 @@ const TextCard: React.FC<TextCardProps> = ({
   };
 
   const handleSave = async () => {
-    console.log("cardKey in handleSave", cardKey);
+    if (editedText === text) {
+      closeModal();
+      return;
+    }
+    console.log("editedText", editedText);
+    if (editedText === "") {
+      console.log("editedText is empty");
+      toast.error("Text cannot be empty!");
+      return;
+    }
     const request = await fetch(`/api/uploadText/${userId}`, {
       method: "POST",
       body: JSON.stringify({ text: editedText, id: cardKey }),
     });
     if (request.ok) {
       const data = await request.json();
-      console.log(data.text);
       if (setFiles && files) {
         const updatedFiles = files.map((file) =>
-          file._id === data.id ? { ...file, text: data.text } : file
+          file._id === data.id
+            ? { ...file, text: data.text, name: data.name, title: data.name }
+            : file
         );
         setFiles(updatedFiles);
+        console.log("files", files);
       }
+    } else {
+      toast.error("Failed to save changes!");
     }
-    closeModal();
+    setIsModalOpen(false);
   };
 
   return (

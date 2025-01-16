@@ -106,6 +106,8 @@ export async function POST(
       id: id || result?.insertedId,
       storageUrl,
       text,
+      name: text.slice(0, 10),
+      title: text.slice(0, 10),
     });
   } catch (error) {
     console.error("Error uploading text:", error);
