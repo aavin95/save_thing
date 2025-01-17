@@ -18,14 +18,15 @@ const FileWrapper = styled.div`
 const FileSelectionWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 10px;
   background-color: #f7efdf;
   border-radius: 20px;
   padding: 10px;
-  margin-left: 299px;
-  margin-right: 299px;
+  box-sizing: border-box;
+  max-width: 800px;
 `;
 
 const FileSelectionButton = styled.button.withConfig({
@@ -38,7 +39,6 @@ const FileSelectionButton = styled.button.withConfig({
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s;
-
   &:hover {
     transform: scale(1.05);
     background-color: #f87171;

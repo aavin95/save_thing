@@ -5,6 +5,17 @@ import { useSession } from "next-auth/react";
 import LoadingSpinner from "./LoadingSpinner";
 import TextField from "./TextField";
 import { File } from "../types/types";
+import styled from "styled-components";
+
+const SaveContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  > * {
+    flex-shrink: 0; /* Disable shrinking for all child components */
+    width: 100%; /* Ensure child components take the full width if needed */
+  }
+`;
 
 const Save: React.FC = () => {
   const { data: session, status } = useSession();
@@ -40,7 +51,7 @@ const Save: React.FC = () => {
   }
 
   return (
-    <div>
+    <SaveContainer>
       {session?.user?.id && (
         <>
           <Upload userId={session.user.id} files={files} setFiles={setFiles} />
@@ -56,7 +67,7 @@ const Save: React.FC = () => {
           />
         </>
       )}
-    </div>
+    </SaveContainer>
   );
 };
 
