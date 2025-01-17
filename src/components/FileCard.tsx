@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import styled from "styled-components";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { File } from "../types/types";
 
-const FileCardWrapper = styled.button`
+const FileCardWrapper = styled.div`
+  break-inside: avoid;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,6 +19,7 @@ const FileCardWrapper = styled.button`
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.3s, transform 0.3s;
+  margin: 10px 0;
 
   &:hover {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -28,9 +29,9 @@ const FileCardWrapper = styled.button`
   img,
   video,
   div {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
     margin-bottom: 10px;
     border-radius: 12px;
     border: 1px solid #ddd;
@@ -110,7 +111,10 @@ const FileCard = ({ file }: { file: File }) => {
           data={file.storageUrl || file.content || "/public/default_image.png"}
           type={file.type}
           onClick={openFile}
-          style={{ width: "100%", height: "auto" }}
+          style={{
+            width: "100%",
+            height: "auto",
+          }}
         ></object>
       )}
 

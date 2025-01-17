@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const CardWrapper = styled.div`
+  break-inside: avoid;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -17,8 +18,7 @@ const CardWrapper = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  margin: 10px auto;
+  margin: 10px 0;
   transition: box-shadow 0.3s, transform 0.3s;
 
   &:hover {

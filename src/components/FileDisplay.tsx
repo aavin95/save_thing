@@ -9,11 +9,10 @@ import { File } from "../types/types";
 import LoadingSpinner from "./LoadingSpinner";
 
 const FileWrapper = styled.div`
+  column-count: 3;
+  column-gap: 20px;
   max-width: 1200px;
   margin: 50px auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
 `;
 
 const FileSelectionWrapper = styled.div`
