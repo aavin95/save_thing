@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import FileCard from "./FileCard";
 import TextCard from "./TextCard";
 import { File } from "../types/types";
+import LoadingSpinner from "./LoadingSpinner";
 
 const FileWrapper = styled.div`
   max-width: 1200px;
@@ -13,25 +14,6 @@ const FileWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-`;
-
-const LoadingSpinner = styled.div`
-  margin: 50px auto;
-  border: 4px solid #e5e7eb;
-  border-top: 4px solid #2563eb;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
 `;
 
 const FileSelectionWrapper = styled.div`
