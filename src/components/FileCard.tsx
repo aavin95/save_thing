@@ -97,50 +97,23 @@ const FileCard = ({ file }: { file: File }) => {
 
   return (
     <FileCardWrapper>
-      {file.type.startsWith("image/") ? (
-        <Image
-          src={file.storageUrl || file.content || "/public/default_image.png"} // Provide a default image path
-          alt={file.name}
-          width={80}
-          height={80}
-          onClick={openFile}
-        />
-      ) : file.type.startsWith("video/") ? (
+      {file.type.startsWith("video/") ? (
         <video
           src={file.storageUrl || file.content || "/public/default_image.png"} // URL for video
           controls
-          width="80"
-          height="80"
+          width="100%"
+          height="auto"
           onClick={openFile}
         />
-      ) : file.type === "application/pdf" ? (
-        <iframe
-          src={file.storageUrl || file.content || "/public/default_image.png"}
-          width="80"
-          height="80"
-          onClick={openFile}
-        />
-      ) : file.type === "text/plain" ? (
-        <div>
-          <p>{file.text || "No content available"}</p>
-        </div>
       ) : (
-        <div
-          style={{
-            width: "80px",
-            height: "80px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#e5e7eb",
-            borderRadius: "8px",
-            fontSize: "1.5rem",
-            color: "#6b7280",
-          }}
-        >
-          ❓
-        </div>
+        <object
+          data={file.storageUrl || file.content || "/public/default_image.png"}
+          type={file.type}
+          onClick={openFile}
+          style={{ width: "100%", height: "auto" }}
+        ></object>
       )}
+
       {isEditing ? (
         <EditableInput
           value={title}
