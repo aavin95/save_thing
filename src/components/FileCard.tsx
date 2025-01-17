@@ -96,13 +96,14 @@ const FileCard = ({ file }: { file: File }) => {
   };
 
   return (
-    <FileCardWrapper onClick={openFile}>
+    <FileCardWrapper>
       {file.type.startsWith("image/") ? (
         <Image
           src={file.storageUrl || file.content || "/public/default_image.png"} // Provide a default image path
           alt={file.name}
           width={80}
           height={80}
+          onClick={openFile}
         />
       ) : file.type.startsWith("video/") ? (
         <video
@@ -110,12 +111,14 @@ const FileCard = ({ file }: { file: File }) => {
           controls
           width="80"
           height="80"
+          onClick={openFile}
         />
       ) : file.type === "application/pdf" ? (
         <iframe
           src={file.storageUrl || file.content || "/public/default_image.png"}
           width="80"
           height="80"
+          onClick={openFile}
         />
       ) : file.type === "text/plain" ? (
         <div>
