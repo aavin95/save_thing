@@ -100,17 +100,20 @@ const TextUpload = ({
       if (!data.success) {
         console.error("Text upload failed:", data.error);
       } else {
-        console.log("Text uploaded:", data.id);
-        setText(""); // Clear the text area after successful upload
-        const newFile = {
-          _id: data.id,
-          name: text.slice(0, 10),
-          title: text.slice(0, 10),
-          type: "text/plain",
-          storageUrl: data.storageUrl,
-        };
-
-        setFiles((prevFiles: File[]) => [...prevFiles, newFile]);
+        try {
+          const newFile = {
+            _id: data.id,
+            name: text.slice(0, 10),
+            type: "text/plain",
+            title: text.slice(0, 10),
+            storageUrl: data.storageUrl,
+            text: text,
+          };
+          setFiles((prevFiles: File[]) => [...prevFiles, newFile]);
+          setText(""); // Clear the text area after successful upload
+        } catch (error) {
+          console.error("Error uploading text:", error);
+        }
       }
     } catch (error) {
       console.error("Error uploading text:", error);

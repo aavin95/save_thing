@@ -90,17 +90,14 @@ const FileCard = ({ file }: { file: File }) => {
   };
 
   const openFile = () => {
-    window.open(
-      file.storageUrl || file.content || "/public/default_image.png",
-      "_blank"
-    );
+    window.open(file.storageUrl || "/public/default_image.png", "_blank");
   };
 
   return (
     <FileCardWrapper>
       {file.type.startsWith("video/") ? (
         <video
-          src={file.storageUrl || file.content || "/public/default_image.png"} // URL for video
+          src={file.storageUrl || "/public/default_image.png"} // URL for video
           controls
           width="100%"
           height="auto"
@@ -108,7 +105,7 @@ const FileCard = ({ file }: { file: File }) => {
         />
       ) : (
         <object
-          data={file.storageUrl || file.content || "/public/default_image.png"}
+          data={file.storageUrl || "/public/default_image.png"}
           type={file.type}
           onClick={openFile}
           style={{
