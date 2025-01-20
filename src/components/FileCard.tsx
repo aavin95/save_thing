@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
@@ -20,6 +18,10 @@ const FileCardWrapper = styled.div`
   color: inherit;
   transition: box-shadow 0.3s, transform 0.3s;
   margin: 10px 0;
+  position: relative; /* For absolute positioning of the button */
+
+  /* Add padding to make space for the download button */
+  padding-bottom: 50px;
 
   &:hover {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -58,7 +60,7 @@ const EditableInput = styled.input`
 `;
 
 const FileCard = ({ file }: { file: File }) => {
-  const [title, setTitle] = useState<string>(file?.title || ""); // Local state for title
+  const [title, setTitle] = useState<string>(file?.title || file.name); // Use name as fallback
   const [isEditing, setIsEditing] = useState(false); // State to track editing
   const { data: session } = useSession();
 
@@ -95,41 +97,59 @@ const FileCard = ({ file }: { file: File }) => {
 
   return (
     <FileCardWrapper>
+      {/* File Preview */}
       {file.type.startsWith("video/") ? (
         <video
-          src={file.storageUrl || "/public/default_image.png"} // URL for video
+          src={file.storageUrl || "/public/default_image.png"}
           controls
           width="100%"
           height="auto"
           onClick={openFile}
         />
       ) : (
-        <object
-          data={file.storageUrl || "/public/default_image.png"}
-          type={file.type}
-          onClick={openFile}
-          style={{
-            width: "100%",
-            height: "auto",
-          }}
-        ></object>
+        <div style={{ position: "relative", width: "100%", height: "auto" }}>
+          {/* Transparent overlay */}
+          <div
+            onClick={openFile}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              cursor: "pointer",
+              background: "rgba(0, 0, 0, 0)", // Fully transparent
+            }}
+          ></div>
+
+          {/* PDF display */}
+          <object
+            data={file.storageUrl || "/public/default_image.png"}
+            type={file.type}
+            style={{
+              width: "100%",
+              height: "auto",
+            }}
+          ></object>
+        </div>
       )}
 
+      {/* Title or Editable Input */}
       {isEditing ? (
         <EditableInput
           value={title}
-          onChange={(e) => setTitle(e.target.value)} // Update local state
-          onBlur={handleTitleChange} // Save on blur
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={handleTitleChange}
           onKeyPress={(e) => {
-            if (e.key === "Enter") handleTitleChange(); // Save on Enter
+            if (e.key === "Enter") handleTitleChange();
           }}
           autoFocus
-          style={{ color: "black" }} // Set text color to black
+          style={{ color: "black" }}
         />
       ) : (
         <p
-          onClick={() => setIsEditing(true)} // Enable editing on click
-          style={{ cursor: "pointer", color: "black" }} // Set text color to black
+          onClick={() => setIsEditing(true)}
+          style={{ cursor: "pointer", color: "black" }}
         >
           {title}
         </p>
