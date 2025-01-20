@@ -44,3 +44,26 @@ export async function POST(
     message: "Title updated successfully",
   });
 }
+export async function DELETE(
+  req: Request,
+  { params }: { params: { userId: string; fileId: string } }
+) {
+  const client = await clientPromise;
+  const db = client.db("save_thing");
+  const collection = db.collection("uploads");
+  const { userId, fileId } = await params;
+  const result = await collection.deleteOne({
+    userId,
+    _id: new ObjectId(fileId),
+  });
+  if (result.deletedCount === 0) {
+    return NextResponse.json(
+      { success: false, error: "File not found" },
+      { status: 404 }
+    );
+  }
+  return NextResponse.json({
+    success: true,
+    message: "File deleted successfully",
+  });
+}
