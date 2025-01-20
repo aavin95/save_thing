@@ -43,15 +43,19 @@ const TextContent = styled.div.withConfig({
 
 const ToggleButton = styled.button`
   margin-top: 10px;
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 0.9rem;
-  text-decoration: underline;
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
   cursor: pointer;
 
   &:hover {
-    color: #1e40af;
+    transform: scale(1.05);
+    background-color: #1e40af;
   }
 `;
 
@@ -80,6 +84,23 @@ const StyledButton = styled.button`
   }
 `;
 
+const CopyButton = styled.button`
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: #059669;
+  }
+`;
+
 interface TextCardProps {
   title: string;
   text: string;
@@ -104,9 +125,7 @@ const TextCard: React.FC<TextCardProps> = ({
     Modal.setAppElement("body");
   }, []);
 
-  const handleCardClick = () => {
-    setIsModalOpen(true);
-  };
+  const handleCardClick = () => {};
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -145,18 +164,29 @@ const TextCard: React.FC<TextCardProps> = ({
     setIsModalOpen(false);
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast.success("Text copied to clipboard!");
+      },
+      () => {
+        toast.error("Failed to copy text!");
+      }
+    );
+  };
+
   return (
     <>
-      <CardWrapper onClick={handleCardClick}>
+      <CardWrapper onClick={handleCopy}>
         <TextContent expanded={isExpanded}>{text}</TextContent>
         {text.length > 100 && (
           <ToggleButton
             onClick={(e) => {
               e.stopPropagation();
-              setIsExpanded(!isExpanded);
+              setIsModalOpen(true); // Open the modal when the button is clicked
             }}
           >
-            {isExpanded ? "Read less" : "Read more"}
+            {isExpanded ? "Read less" : "Read more and Edit"}
           </ToggleButton>
         )}
       </CardWrapper>
@@ -172,8 +202,9 @@ const TextCard: React.FC<TextCardProps> = ({
             bottom: "auto",
             marginRight: "-50%",
             transform: "translate(-50%, -50%)",
-            width: "80%",
-            maxWidth: "600px",
+            height: "65%",
+            width: "90%",
+            maxWidth: "800px",
             backgroundColor: "white",
             border: "1px solid #e5e7eb",
             borderRadius: "16px",
@@ -182,16 +213,17 @@ const TextCard: React.FC<TextCardProps> = ({
           },
         }}
       >
-        <h2>Edit Text</h2>
         <TextArea
           value={editedText}
           onChange={(e) => setEditedText(e.target.value)}
+          style={{ height: "90%" }}
         />
         <div
           style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
         >
           <StyledButton onClick={closeModal}>Cancel</StyledButton>
           <StyledButton onClick={handleSave}>Save</StyledButton>
+          <CopyButton onClick={handleCopy}>Copy</CopyButton>
         </div>
       </Modal>
     </>
